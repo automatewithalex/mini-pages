@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Alex’s Mini Tools</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:rgba(255,255,255,.06);
+      --border:rgba(255,255,255,.14);
+      --text:#e8eef6;
+      --muted:rgba(232,238,246,.70);
+      --muted2:rgba(232,238,246,.55);
+      --focus:rgba(120,180,255,.45);
+      color-scheme: dark;
+    }
+    [data-theme="light"]{
+      --bg:#f7f8fb;
+      --panel:rgba(0,0,0,.05);
+      --border:rgba(0,0,0,.12);
+      --text:#111827;
+      --muted:rgba(17,24,39,.70);
+      --muted2:rgba(17,24,39,.55);
+      --focus:rgba(60,120,255,.35);
+      color-scheme: light;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      min-height:100vh;
+    }
+
+    .topRight{
+      position:fixed; top:14px; right:14px; z-index:20;
+      display:flex; gap:10px; align-items:center;
+    }
+    .pillGroup{
+      display:inline-flex; overflow:hidden; border:1px solid var(--border);
+      border-radius:999px; background:var(--panel);
+      backdrop-filter: blur(8px);
+    }
+    .pillGroup button{
+      border:0; background:transparent; color:var(--text);
+      padding:10px 12px; cursor:pointer; min-width:44px; height:40px; font-size:16px;
+    }
+    .pillGroup button.active{ background:rgba(255,255,255,.10); font-weight:800; }
+    [data-theme="light"] .pillGroup button.active{ background:rgba(0,0,0,.06); }
+    .pillGroup button:focus-visible{ outline:none; box-shadow: inset 0 0 0 2px var(--focus); }
+
+    .wrap{
+      width:min(1060px, 92vw);
+      margin:0 auto;
+      padding: 26px 0 44px;
+    }
+
+    header{
+      padding: 24px 0 12px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    h1{
+      margin:0;
+      font-size: 26px;
+      letter-spacing:.2px;
+    }
+    .sub{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    .controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .search{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border:1px solid var(--border);
+      background:var(--panel);
+      border-radius:16px;
+      padding:10px 12px;
+      min-width:min(420px, 92vw);
+    }
+    .search input{
+      width:100%;
+      border:0;
+      outline:none;
+      background:transparent;
+      color:var(--text);
+      font-size:14px;
+    }
+    .search .hint{
+      color:var(--muted2);
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: repeat(2, 1fr); }
+      .search{ min-width:min(560px, 92vw); }
+    }
+    @media (max-width: 640px){
+      .grid{ grid-template-columns: 1fr; }
+      .search{ min-width:92vw; }
+    }
+
+    .card{
+      border:1px solid var(--border);
+      background: var(--panel);
+      border-radius:22px;
+      padding:14px;
+      position:relative;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height: 160px;
+      cursor:pointer;
+      outline:none;
+    }
+    .card:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.08);
+    }
+    [data-theme="light"] .card:hover{
+      background: rgba(0,0,0,.06);
+    }
+    .card:focus-visible{ box-shadow: 0 0 0 3px var(--focus); }
+
+    .badgeRow{ display:flex; gap:8px; flex-wrap:wrap; }
+    .badge{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    [data-theme="light"] .badge{ background: rgba(0,0,0,.05); }
+
+    .titleRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .name{
+      font-weight:900;
+      font-size:16px;
+      letter-spacing:.2px;
+      margin:0;
+    }
+    .desc{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.35;
+      flex:1;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      margin-top:2px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      border:1px solid var(--border);
+      background:transparent;
+      color:var(--text);
+      padding:9px 11px;
+      border-radius:14px;
+      cursor:pointer;
+      font-size:13px;
+    }
+    .btn:hover{ background: rgba(255,255,255,.08); }
+    [data-theme="light"] .btn:hover{ background: rgba(0,0,0,.05); }
+
+    .lastTag{
+      position:absolute;
+      top:12px;
+      right:12px;
+      font-size:11px;
+      color:var(--muted2);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:5px 9px;
+      background: rgba(255,255,255,.06);
+      display:none;
+    }
+    [data-theme="light"] .lastTag{ background: rgba(0,0,0,.05); }
+    .card.lastOpened .lastTag{ display:inline-flex; }
+
+    footer{
+      margin-top:16px;
+      color:var(--muted2);
+      font-size:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .toast{
+      position:fixed;
+      left:14px; bottom:14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      color:var(--muted);
+      opacity:0;
+      transform: translateY(6px);
+      transition: opacity .18s ease, transform .18s ease;
+      pointer-events:none;
+      backdrop-filter: blur(8px);
+    }
+    [data-theme="light"] .toast{ background: rgba(0,0,0,.05); }
+    .toast.show{ opacity:.95; transform: translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="topRight">
+    <div class="pillGroup" aria-label="Theme">
+      <button id="themeDark" class="active" title="Dark">🌙</button>
+      <button id="themeLight" title="Light">☀️</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Alex’s Mini Pages</h1>
+        <p class="sub">Small, fast, single-page tools. Built for focus, speed, and fun.</p>
+      </div>
+
+      <div class="controls">
+        <div class="search" role="search">
+          <input id="q" placeholder="Search tools… (e.g. focus, read, reaction)" autocomplete="off" />
+          <div class="hint">↑ ↓ Enter</div>
+        </div>
+      </div>
+    </header>
+
+    <div id="grid" class="grid" aria-label="Projects"></div>
+
+    <footer>
+      <div id="count">0 tools</div>
+      <div>Tip: share a tool link after you try it.</div>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast">Copied</div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    // ✅ Edit your tools here
+    const BASE_URL = "https://automatewithalex.github.io/";
+    const PROJECTS = [
+      {
+        id: "speed-reader",
+        name: "Speed Reader",
+        desc: "One word at a time reading with ORP highlighting.",
+        tags: ["reading", "speed", "orp"],
+        url: BASE_URL + "speed-reader/"
+      },
+      {
+        id: "focus-timer",
+        name: "Focus Timer",
+        desc: "Minimal focus/break timer with deep focus and notes.",
+        tags: ["focus", "timer", "notes"],
+        url: BASE_URL + "focus-timer/"
+      },
+      {
+        id: "reaction",
+        name: "Reaction Time",
+        desc: "Fast reaction tester with mixed actions and challenge mode.",
+        tags: ["game", "reflex", "challenge"],
+        url: BASE_URL + "reaction-tester/"
+      }
+    ];
+
+    const THEME_KEY = "alex_mini_tools_theme_v1";
+    const LAST_OPEN_KEY = "alex_mini_tools_last_open_v1";
+
+    const grid = $("grid");
+    const q = $("q");
+    const toast = $("toast");
+    const count = $("count");
+
+    const themeDark = $("themeDark");
+    const themeLight = $("themeLight");
+
+    let filtered = [];
+    let selectedIndex = -1;
+    let keyboardNavUsed = false;
+
+    function setTheme(theme){
+      if (theme === "light"){
+        document.documentElement.setAttribute("data-theme","light");
+        themeLight.classList.add("active");
+        themeDark.classList.remove("active");
+      } else {
+        document.documentElement.setAttribute("data-theme","dark");
+        themeDark.classList.add("active");
+        themeLight.classList.remove("active");
+      }
+      localStorage.setItem(THEME_KEY, theme);
+    }
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=>toast.classList.remove("show"), 900);
+    }
+
+    function matches(p, query){
+      if (!query) return true;
+      const s = (p.name + " " + p.desc + " " + p.tags.join(" ")).toLowerCase();
+      return s.includes(query.toLowerCase());
+    }
+
+    function setLastOpened(id){
+      localStorage.setItem(LAST_OPEN_KEY, JSON.stringify({ id, ts: Date.now() }));
+    }
+
+    function getLastOpened(){
+      try{
+        return JSON.parse(localStorage.getItem(LAST_OPEN_KEY) || "null");
+      }catch{
+        return null;
+      }
+    }
+
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        showToast("Copied link");
+      }catch{
+        showToast("Copy failed");
+      }
+    }
+
+    function render(){
+      const query = (q.value || "").trim();
+      const last = getLastOpened();
+
+      filtered = PROJECTS.filter(p => matches(p, query));
+      if (selectedIndex >= filtered.length) selectedIndex = Math.max(0, filtered.length - 1);
+
+      grid.innerHTML = "";
+
+      filtered.forEach((p, idx) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.tabIndex = 0;
+        card.dataset.id = p.id;
+
+        if (last && last.id === p.id) card.classList.add("lastOpened");
+
+        card.innerHTML = `
+          <div class="lastTag">last opened</div>
+          <div class="titleRow">
+            <h3 class="name">${escapeHtml(p.name)}</h3>
+          </div>
+          <p class="desc">${escapeHtml(p.desc)}</p>
+          <div class="badgeRow">
+            ${p.tags.map(t => `<span class="badge">${escapeHtml(t)}</span>`).join("")}
+          </div>
+          <div class="actions">
+            <button class="btn openBtn" type="button">Open</button>
+            <button class="btn copyBtn" type="button">Copy link</button>
+          </div>
+        `;
+
+        // Click anywhere on card = open
+        card.addEventListener("click", (e) => {
+          const btn = e.target.closest("button");
+          if (btn) return; // handled below
+          openProject(p);
+        });
+
+        card.querySelector(".openBtn").addEventListener("click", () => openProject(p));
+        card.querySelector(".copyBtn").addEventListener("click", () => copyText(p.url));
+
+        // highlight selection only after keyboard navigation
+        if (keyboardNavUsed && idx === selectedIndex) {
+          card.style.boxShadow = `0 0 0 3px var(--focus)`;
+        }
+
+        grid.appendChild(card);
+      });
+
+      count.textContent = `${filtered.length} tool${filtered.length === 1 ? "" : "s"}`;
+    }
+
+    function openProject(p){
+      if (!p.url || p.url.includes("PASTE_YOUR_")) {
+        showToast("Set the URL first");
+        return;
+      }
+      setLastOpened(p.id);
+      window.open(p.url, "_blank", "noopener,noreferrer");
+      render();
+    }
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // keyboard navigation
+    window.addEventListener("keydown", (e) => {
+      // ignore if user is typing in input (except arrows + enter)
+      const inInput = document.activeElement === q;
+      const k = e.key;
+
+      if (k === "ArrowDown"){
+        e.preventDefault();
+        keyboardNavUsed = true;
+        if (filtered.length){
+          if (selectedIndex === -1) selectedIndex = 0;
+          selectedIndex = Math.min(filtered.length - 1, selectedIndex + 1);
+          render();
+        }
+        return;
+      }
+      if (k === "ArrowUp"){
+        e.preventDefault();
+        keyboardNavUsed = true;
+        if (filtered.length){
+          if (selectedIndex === -1) selectedIndex = filtered.length - 1;
+          selectedIndex = Math.max(0, selectedIndex - 1);
+          render();
+        }
+        return;
+      }
+      if (k === "Enter"){
+        // If typing in search, Enter opens selected
+        if (!filtered.length) return;
+        if (selectedIndex === -1) selectedIndex = 0;
+        // Avoid Enter inside buttons (browser will trigger click anyway)
+        if (document.activeElement && document.activeElement.tagName === "BUTTON") return;
+        openProject(filtered[selectedIndex]);
+        return;
+      }
+
+      // Quick focus search
+      if (!inInput && k.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey){
+        q.focus();
+      }
+    });
+
+    q.addEventListener("input", () => { selectedIndex = -1; render(); });
+
+    themeDark.addEventListener("click", ()=> setTheme("dark"));
+    themeLight.addEventListener("click", ()=> setTheme("light"));
+
+    // init
+    setTheme(localStorage.getItem(THEME_KEY) || "dark");
+    render();
+  </script>
+</body>
+</html>
